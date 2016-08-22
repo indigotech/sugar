@@ -76,13 +76,11 @@ type
     method GetContentAsJson(contentCallback: not nullable HttpContentResponseBlock<JsonDocument>);
     method SaveContentAsFile(aTargetFile: File; contentCallback: not nullable HttpContentResponseBlock<File>);
 
-  unit
-    {$IF NOT ECHOES OR (NOT WINDOWS_PHONE AND NOT NETFX_CORE)}
     method GetContentAsStringSynchronous(aEncoding: Encoding := nil): not nullable String;
     method GetContentAsBinarySynchronous: not nullable Binary;
     method GetContentAsXmlSynchronous: not nullable XmlDocument;
     method GetContentAsJsonSynchronous: not nullable JsonDocument;
-    {$ENDIF}
+
   end;
   
   HttpResponseContent<T> = public class
@@ -433,6 +431,16 @@ begin
   async try
     var lConnection := java.net.URL(aRequest.URL).openConnection as java.net.HttpURLConnection;
 
+     case aRequest.Mode of
+       HttpRequestMode.Get: lConnection.setRequestMethod("GET");
+       HttpRequestMode.Post: lConnection.setRequestMethod("POST");
+       HttpRequestMode.Head: lConnection.setRequestMethod("HEAD");
+       HttpRequestMode.Put: lConnection.setRequestMethod("PUT");
+       HttpRequestMode.Delete: lConnection.setRequestMethod("DELETE");
+       HttpRequestMode.Options: lConnection.setRequestMethod("OPTIONS");
+       HttpRequestMode.Trace: lConnection.setRequestMethod("TRACE");
+    end;
+
     for each k in aRequest.Headers.Keys do
       lConnection.setRequestProperty(k, aRequest.Headers[k]);
     
@@ -553,6 +561,16 @@ method Http.ExecuteRequestSynchronous(aRequest: not nullable HttpRequest): not n
 begin
   {$IF COOPER}
   var lConnection := java.net.URL(aRequest.URL).openConnection as java.net.HttpURLConnection;
+  
+  case aRequest.Mode of
+    HttpRequestMode.Get: lConnection.setRequestMethod("GET");
+    HttpRequestMode.Post: lConnection.setRequestMethod("POST");
+    HttpRequestMode.Head: lConnection.setRequestMethod("HEAD");
+    HttpRequestMode.Put: lConnection.setRequestMethod("PUT");
+    HttpRequestMode.Delete: lConnection.setRequestMethod("DELETE");
+    HttpRequestMode.Options: lConnection.setRequestMethod("OPTIONS");
+    HttpRequestMode.Trace: lConnection.setRequestMethod("TRACE");
+  end;
   
   for each k in aRequest.Headers.Keys do
     lConnection.setRequestProperty(k, aRequest.Headers[k]);
